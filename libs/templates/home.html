@@ -1,0 +1,74 @@
+{% extends "default.html" %}
+
+{% block body %}
+    {% if dataset %}
+        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
+            Fechar dataset
+        </button>
+
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    {% for column in dataset[0].keys() %}
+                        <th scope="col">{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in dataset %}
+                    <tr>
+                        {% for column in row.values() %}
+                            <td>{{ column }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if pagination.first != pagination.active and pagination.first != pagination.previous %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.first) }}">{{ pagination.first }}</a></li>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+
+                {% if pagination.has_previous %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.previous) }}">{{ pagination.previous }}</a></li>
+                {% endif %}
+
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ pagination.active }}</span>
+                </li>
+
+                {% if pagination.has_next %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.next) }}">{{ pagination.next }}</a></li>
+                {% endif %}
+
+                {% if pagination.last != pagination.active and pagination.last != pagination.next %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.last) }}">{{ pagination.last }}</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% else %}
+        <form method="GET" action="{{ url_for('show_dataset') }}">
+            <button type="submit" class="btn btn-primary">
+                Ver dataset
+            </button>
+        </form>
+    {% endif %}
+
+    {% if correlation_img %}
+        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
+            Fechar correlação
+        </button>
+
+        <img src="data:image/png;base64,{{ correlation_img }}" alt="Correlation Seaborn Image" class="img-fluid" />
+    {% else %}
+        <form method="GET" action="{{ url_for('show_correlation') }}">
+            <button type="submit" class="btn btn-primary">
+                Ver correlação
+            </button>
+        </form>
+    {% endif %}
+{% endblock %}
