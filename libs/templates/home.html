@@ -62,13 +62,81 @@
         <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
             Fechar correlação
         </button>
-
-        <img src="data:image/png;base64,{{ correlation_img }}" alt="Correlation Seaborn Image" class="img-fluid" />
     {% else %}
         <form method="GET" action="{{ url_for('show_correlation') }}">
             <button type="submit" class="btn btn-primary">
                 Ver correlação
             </button>
         </form>
+    {% endif %}
+
+    {% if confusion_matrix_type and confusion_matrix_type == 'decision-tree' %}
+        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
+            Fechar árvore de decisão
+        </button>
+    {% else %}
+        <form method="GET" action="{{ url_for('show_decision_tree') }}">
+            <button type="submit" class="btn btn-primary">
+                Ver árvore de decisão
+            </button>
+        </form>
+    {% endif %}
+
+    {% if confusion_matrix_type and confusion_matrix_type == 'random_forest' %}
+        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
+            Fechar random forest
+        </button>
+    {% else %}
+        <form method="GET" action="{{ url_for('show_random_forest') }}">
+            <button type="submit" class="btn btn-primary">
+                Ver random forest
+            </button>
+        </form>
+    {% endif %}
+
+    {% if confusion_matrix_type and confusion_matrix_type == 'svc' %}
+        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
+            Fechar svc
+        </button>
+    {% else %}
+        <form method="GET" action="{{ url_for('show_svc') }}">
+            <button type="submit" class="btn btn-primary">
+                Ver svc
+            </button>
+        </form>
+    {% endif %}
+
+    {% if confusion_matrix_type and confusion_matrix_type == 'knn' %}
+        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
+            Fechar knn
+        </button>
+    {% else %}
+        <form method="GET" action="{{ url_for('show_knn') }}">
+            <button type="submit" class="btn btn-primary">
+                Ver knn
+            </button>
+        </form>
+    {% endif %}
+
+
+    {% if confusion_matrix %}
+        {% if accuracy %}
+            <h3>Acurácia: {{ accuracy }}%</h3>
+        {% endif %}
+        {% if macro_avg %}
+            <h3>Média macro: {{ macro_avg }}%</h3>
+        {% endif %}
+
+        {% if params %}
+            {% for param in params %}
+                <h3>{{ param }}</h3>
+                <input type="text" class="form-control" value="{{ params[param] }}" readonly>
+            {% endfor %}
+        {% endif %}
+        <img src="{{ url_for('static', filename='imgs/confusion_matrix.png' ) }}" alt="Confusion matrix d3 Image" class="img-fluid" />
+    {% endif %}
+
+    {% if correlation_img %}
+        <img src="data:image/png;base64,{{ correlation_img }}" alt="Correlation Seaborn Image" class="img-fluid" />
     {% endif %}
 {% endblock %}
