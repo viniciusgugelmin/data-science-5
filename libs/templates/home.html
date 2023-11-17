@@ -1,142 +1,121 @@
 {% extends "default.html" %}
 
 {% block body %}
-    {% if dataset %}
-        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
-            Fechar dataset
-        </button>
+    <div class="container d-flex justify-content-center gap-3 pt-4">
+        {% if dataset %}
+            <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
+                Fechar dataset
+            </button>
+        {% else %}
+            <form method="GET" action="{{ url_for('show_dataset') }}">
+                <button type="submit" class="btn btn-primary">
+                    Ver dataset
+                </button>
+            </form>
+        {% endif %}
 
-        <table class="table table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    {% for column in dataset[0].keys() %}
-                        <th scope="col">{{ column }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in dataset %}
+        {% if correlation_img %}
+            <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
+                Fechar correlação
+            </button>
+        {% else %}
+            <form method="GET" action="{{ url_for('show_correlation') }}">
+                <button type="submit" class="btn btn-primary">
+                    Ver correlação
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    <div class="container mb-4 w-25 mt-4">
+        <form method="GET" action="{{ url_for('show_confusion_matrix') }}">
+            <label for="classifier-select">Escolha um classificador:</label>
+            <select name="v" id="classifier-select" class="form-select">
+                {% for classifier in classifiers_arr %}
+                    <option value="{{ classifier }}" {% if classifier == classifier_selected %}selected{% endif %}>{{ classifier }}</option>
+                {% endfor %}
+            </select>
+
+            {% if classifier_params %}
+                {% for param in classifier_params %}
+                    <div class="form-group mt-3">
+                        <label for="{{ param }}">{{ param }}</label>
+                        <select name="{{ param }}" id="{{ param }}" class="form-select mt-1">
+                            {% for value in classifier_params[param] %}
+                                <option value="{{ value }}" {% if value == params[param] %}selected{% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <center>
+                <button type="submit" class="btn btn-primary mt-4">Ver classificador</button>
+            </center>
+        </form>
+    </div>
+
+    <div class="d-flex justify-content-center align-items-center flex-column pb-4">
+        {% if confusion_matrix %}
+            {% if accuracy %}
+                <h3>Acurácia: {{ accuracy }}%</h3>
+            {% endif %}
+            {% if macro_avg %}
+                <h3>Média macro: {{ macro_avg }}%</h3>
+            {% endif %}
+
+            <img src="{{ url_for('static', filename='imgs/confusion_matrix.png' ) }}" alt="Confusion matrix d3 Image" class="img-fluid" />
+        {% endif %}
+
+        {% if correlation_img %}
+            <img src="data:image/png;base64,{{ correlation_img }}" alt="Correlation Seaborn Image" class="img-fluid" />
+        {% endif %}
+
+        {% if dataset %}
+            <table class="table table-striped">
+                <thead class="thead-dark">
                     <tr>
-                        {% for column in row.values() %}
-                            <td>{{ column }}</td>
+                        {% for column in dataset[0].keys() %}
+                            <th scope="col">{{ column }}</th>
                         {% endfor %}
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for row in dataset %}
+                        <tr>
+                            {% for column in row.values() %}
+                                <td>{{ column }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                {% if pagination.first != pagination.active and pagination.first != pagination.previous %}
-                    <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.first) }}">{{ pagination.first }}</a></li>
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                {% endif %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if pagination.first != pagination.active and pagination.first != pagination.previous %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.first) }}">{{ pagination.first }}</a></li>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
 
-                {% if pagination.has_previous %}
-                    <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.previous) }}">{{ pagination.previous }}</a></li>
-                {% endif %}
+                    {% if pagination.has_previous %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.previous) }}">{{ pagination.previous }}</a></li>
+                    {% endif %}
 
-                <li class="page-item active" aria-current="page">
-                    <span class="page-link">{{ pagination.active }}</span>
-                </li>
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ pagination.active }}</span>
+                    </li>
 
-                {% if pagination.has_next %}
-                    <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.next) }}">{{ pagination.next }}</a></li>
-                {% endif %}
+                    {% if pagination.has_next %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.next) }}">{{ pagination.next }}</a></li>
+                    {% endif %}
 
-                {% if pagination.last != pagination.active and pagination.last != pagination.next %}
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                    <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.last) }}">{{ pagination.last }}</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-    {% else %}
-        <form method="GET" action="{{ url_for('show_dataset') }}">
-            <button type="submit" class="btn btn-primary">
-                Ver dataset
-            </button>
-        </form>
-    {% endif %}
-
-    {% if correlation_img %}
-        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
-            Fechar correlação
-        </button>
-    {% else %}
-        <form method="GET" action="{{ url_for('show_correlation') }}">
-            <button type="submit" class="btn btn-primary">
-                Ver correlação
-            </button>
-        </form>
-    {% endif %}
-
-    {% if confusion_matrix_type and confusion_matrix_type == 'decision-tree' %}
-        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
-            Fechar árvore de decisão
-        </button>
-    {% else %}
-        <form method="GET" action="{{ url_for('show_decision_tree') }}">
-            <button type="submit" class="btn btn-primary">
-                Ver árvore de decisão
-            </button>
-        </form>
-    {% endif %}
-
-    {% if confusion_matrix_type and confusion_matrix_type == 'random_forest' %}
-        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
-            Fechar random forest
-        </button>
-    {% else %}
-        <form method="GET" action="{{ url_for('show_random_forest') }}">
-            <button type="submit" class="btn btn-primary">
-                Ver random forest
-            </button>
-        </form>
-    {% endif %}
-
-    {% if confusion_matrix_type and confusion_matrix_type == 'svc' %}
-        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
-            Fechar svc
-        </button>
-    {% else %}
-        <form method="GET" action="{{ url_for('show_svc') }}">
-            <button type="submit" class="btn btn-primary">
-                Ver svc
-            </button>
-        </form>
-    {% endif %}
-
-    {% if confusion_matrix_type and confusion_matrix_type == 'knn' %}
-        <button class="btn btn-primary mb-3" onclick="window.location.href='{{ url_for('homepage') }}'">
-            Fechar knn
-        </button>
-    {% else %}
-        <form method="GET" action="{{ url_for('show_knn') }}">
-            <button type="submit" class="btn btn-primary">
-                Ver knn
-            </button>
-        </form>
-    {% endif %}
-
-
-    {% if confusion_matrix %}
-        {% if accuracy %}
-            <h3>Acurácia: {{ accuracy }}%</h3>
+                    {% if pagination.last != pagination.active and pagination.last != pagination.next %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                        <li class="page-item"><a class="page-link" href="{{ url_for('show_dataset', page=pagination.last) }}">{{ pagination.last }}</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
         {% endif %}
-        {% if macro_avg %}
-            <h3>Média macro: {{ macro_avg }}%</h3>
-        {% endif %}
-
-        {% if params %}
-            {% for param in params %}
-                <h3>{{ param }}</h3>
-                <input type="text" class="form-control" value="{{ params[param] }}" readonly>
-            {% endfor %}
-        {% endif %}
-        <img src="{{ url_for('static', filename='imgs/confusion_matrix.png' ) }}" alt="Confusion matrix d3 Image" class="img-fluid" />
-    {% endif %}
-
-    {% if correlation_img %}
-        <img src="data:image/png;base64,{{ correlation_img }}" alt="Correlation Seaborn Image" class="img-fluid" />
-    {% endif %}
+    </div>
 {% endblock %}
